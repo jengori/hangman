@@ -77,7 +77,7 @@ function playGame() {
 
         document.addEventListener("keydown", function(e) {
             if (canPick){
-                chosenLetter = e.key;
+                chosenLetter = e.key.toLowerCase();
                 
                 if (!lettersChosen.includes(chosenLetter)) {
                     lettersChosen.push(chosenLetter);
