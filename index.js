@@ -1,132 +1,94 @@
 const words = ['pumpkin', 'skeleton', 'zombie', 'goblin', 'werewolf', 'monster', 'spider', 'graveyard', 'dracula', 'vampire'];
-
 const bodyParts = ['head', 'body', 'left-arm', 'right-arm', 'left-leg', 'right-leg'];
+const alphabet = 'abcdefghijklmnopqrstuvwxyz'.split('');
 
-const alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
+const gameState = {
+  hasStarted: false,
+  guessedWord: '',
+  guessedLetters: [],
+  wrongGuessCount: 0,
+};
 
-let gameHasStarted = false;
-
-document.addEventListener("keydown", playGame);
+document.addEventListener('keydown', initiateGame);
 
 function chooseRandomWord(list) {
-    let word = list[Math.floor(Math.random() * list.length)];
-    return word;
-};
-
-function hideMan() {
-    for (let i=0; i<bodyParts.length; i++) {
-        document.getElementById(bodyParts[i]).style.display = "None";
-    };
-};
-
-function displayWord(word) {
-    let wordDisplay =  "_ ".repeat(word.length);
-    let lettersHtml = "";
-
-    for (let i=0; i<alphabet.length; i++) {
-        lettersHtml += "<span id='" +  alphabet[i] + "'>" + alphabet[i] + "</span> ";
-    };
-
-    document.getElementById("text").innerHTML = "<h1 id='word-display'>" + wordDisplay + "</h1><h3 id='guess-text'>Guess a letter!<br></h3><p>" + lettersHtml + "</p>";
-
-    return wordDisplay;
-};
-
-function strikeOutLetter(letter){
-    document.getElementById(letter).style.textDecoration = "line-through";
-};
-
-function addBodyPart(n) {
-    document.getElementById(bodyParts[n]).style.display = "block";
-};
-
-function displayWinMessage() {
-    document.getElementById('guess-text').innerHTML = `Yay! You won the game!<br>Press any key to play again.`
-};
-
-function displayLoseMessage(word) {
-    document.getElementById('guess-text').innerHTML= `Oh no! 'You lost the game.<br>The word was '${word}'.<br>Press any key to play again.`
+  return list[Math.floor(Math.random() * list.length)];
 }
 
-function displayRightMessage(letter) {
-    document.getElementById('guess-text').innerHTML = `Good job! '${letter}' is in the word.<br>Guess another letter.`;
-};
+function hideMan() {
+  bodyParts.forEach(part => {
+    document.getElementById(part).style.display = 'none';
+  });
+}
 
-function displayWrongMessage(letter) {
-    document.getElementById('guess-text').innerHTML= `Bad luck! '${letter}' is not in the word.<br>Guess another letter.`
-};
+function displayWord(word) {
+  const hiddenWord = '_ '.repeat(word.length);
+  const lettersHtml = alphabet.map(letter => `<span id='${letter}'>${letter}</span> `).join('');
 
-function alreadyTriedMessage() {
-    document.getElementById('guess-text').innerHTML = `You've already tried that letter!<br>Guess another letter.`;
-};
+  document.getElementById('text').innerHTML = `<h1 id='word-display'>${hiddenWord}</h1><h3 id='guess-text'>Guess a letter!<br></h3><p>${lettersHtml}</p>`;
+  return hiddenWord;
+}
 
-function playGame() {
-    if (!gameHasStarted) {
-        gameHasStarted = true;
-        let wordGuessed = false;
-        let lettersChosen = [];
-        let bodyPartNum = 0;
+function updateMessage(id, message) {
+  document.getElementById(id).innerHTML = message;
+}
 
-        const wordChoice = chooseRandomWord(words);
+function processGuess(chosenLetter) {
+  const { guessedWord, guessedLetters, wrongGuessCount } = gameState;
+  
+  if (guessedLetters.includes(chosenLetter)) {
+    updateMessage('guess-text', `You've already tried '${chosenLetter}'. Try another letter.`);
+    return;
+  }
 
-        hideMan();
+  guessedLetters.push(chosenLetter);
+  document.getElementById(chosenLetter).style.textDecoration = 'line-through';
 
-        let wordDisplay = displayWord(wordChoice);
-        let chosenLetter;
-        let canPick = true;
+  if (guessedWord.includes(chosenLetter)) {
+    const updatedDisplay = guessedWord.split('').map((letter, i) => {
+      return guessedLetters.includes(letter) ? letter : '_';
+    }).join(' ');
 
-        document.addEventListener("keydown", function(e) {
-            if (canPick){
-                chosenLetter = e.key.toLowerCase();
-                
-                if (!lettersChosen.includes(chosenLetter)) {
-                    lettersChosen.push(chosenLetter);
-                    strikeOutLetter(chosenLetter);
-                   
-                    if (wordChoice.includes(chosenLetter)) {
-                        
-                        let wordDisplayArray = wordDisplay.split("")
-                        for (let i=0; i<wordChoice.length; i++){
-                            if (wordChoice.charAt(i) === chosenLetter) {
-                                wordDisplayArray[i*2] = chosenLetter;
-                            }
-                        wordDisplay = wordDisplayArray.join("")
-                        }
-            
-                        document.getElementById("word-display").innerText = wordDisplay;   
-                        
-                        if (wordDisplay.includes("_")) {
-                            displayRightMessage(chosenLetter);
-                            
-                        }
+    document.getElementById('word-display').innerText = updatedDisplay;
+    updateMessage('guess-text', `Good job! '${chosenLetter}' is in the word. Guess another letter.`);
 
-                        else {
-                            displayWinMessage();
-                            canPick = false;
-                            gameHasStarted = false;
-                        };
-                    }
+    if (!updatedDisplay.includes('_')) {
+      updateMessage('guess-text', 'Yay! You won the game! Press any key to play again.');
+      resetGame();
+    }
+  } else {
+    document.getElementById(bodyParts[wrongGuessCount]).style.display = 'block';
+    gameState.wrongGuessCount++;
 
-                    else {
-                        addBodyPart(bodyPartNum);
-                        if (bodyPartNum <5){
-                            displayWrongMessage(chosenLetter);
-                            bodyPartNum++;
-                        }
+    if (wrongGuessCount < bodyParts.length - 1) {
+      updateMessage('guess-text', `Bad luck! '${chosenLetter}' is not in the word. Guess another letter.`);
+    } else {
+      updateMessage('guess-text', `Oh no! You lost. The word was '${guessedWord}'. Press any key to play again.`);
+      resetGame();
+    }
+  }
+}
 
-                        else {
-                            displayLoseMessage(wordChoice);
-                            canPick = false;
-                            gameHasStarted = false;
-                        }
-                    }
-                }
+function resetGame() {
+  gameState.hasStarted = false;
+  gameState.guessedWord = '';
+  gameState.guessedLetters = [];
+  gameState.wrongGuessCount = 0;
+}
 
-                else {
-                   alreadyTriedMessage();
-                }
-                }
-            }
-            )
-        }
-};
+function initiateGame(e) {
+  if (!gameState.hasStarted) {
+    gameState.hasStarted = true;
+    gameState.guessedWord = chooseRandomWord(words);
+    
+    hideMan();
+    displayWord(gameState.guessedWord);
+
+    document.addEventListener('keydown', e => {
+      const chosenLetter = e.key.toLowerCase();
+      if (alphabet.includes(chosenLetter)) {
+        processGuess(chosenLetter);
+      }
+    });
+  }
+}
