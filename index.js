@@ -7,6 +7,7 @@ const gameState = {
   guessedWord: '',
   guessedLetters: [],
   wrongGuessCount: 0,
+  firstGame: true
 };
 
 document.addEventListener('keydown', initiateGame);
@@ -74,6 +75,7 @@ function resetGame() {
   gameState.guessedWord = '';
   gameState.guessedLetters = [];
   gameState.wrongGuessCount = 0;
+  gameState.firstGame = false;
 }
 
 function initiateGame(e) {
@@ -84,11 +86,13 @@ function initiateGame(e) {
     hideMan();
     displayWord(gameState.guessedWord);
 
-    document.addEventListener('keydown', e => {
+    if (gameState.firstGame) {
+      document.addEventListener('keydown', e => {
       const chosenLetter = e.key.toLowerCase();
       if (alphabet.includes(chosenLetter)) {
         processGuess(chosenLetter);
       }
-    });
+      });
+    };
   }
 }
