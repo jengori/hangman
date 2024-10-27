@@ -1,4 +1,4 @@
-const words = ['pumpkin', 'skeleton', 'zombie', 'goblin', 'werewolf', 'monster', 'spider', 'graveyard', 'dracula', 'vampire', 'cemetery', 'lantern', 'demon', 'cauldron', 'coffin', 'witch', 'broomstick', 'nightmare', 'haunted', 'scary', 'ghost', 'wizard', 'mummy', 'potion'];
+const words = ['pumpkin', 'skeleton', 'zombie', 'goblin', 'werewolf', 'monster', 'spider', 'graveyard', 'dracula', 'vampire', 'cemetery', 'lantern', 'demonic', 'cauldron', 'coffin', 'witchcraft', 'broomstick', 'nightmare', 'haunted', 'ghostly', 'screaming', 'apparition', 'frankenstein', 'bogeyman', 'poltergeist', 'ghoulish', 'mummified', 'deceased'];
 const bodyParts = ['head', 'body', 'left-arm', 'right-arm', 'left-leg', 'right-leg'];
 const alphabet = 'abcdefghijklmnopqrstuvwxyz'.split('');
 
